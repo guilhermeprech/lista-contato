@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestão de Contatos</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Gestão de Contatos</h1>
+      <button type="button">Adicionar Contato</button>
+    </header>
+    <section>
+      <h2>Adicionar Contato</h2>
+      <form>
+        <input type="text" placeholder="Nome" />
+        <input type="email" placeholder="Email" />
+        <input type="tel" placeholder="Telefone" />
+        <div class="buttons">
+          <button type="submit">Adicionar</button>
+          <button type="button">Cancelar</button>
+        </div>
+      </form>
+    </section>
+    <section>
+      <h2>Lista de Contatos</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Telefone</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>John Doe</td>
+            <td>john.doe@example.com</td>
+            <td>1234567890</td>
+            <td>
+              <div class="buttons">
+                <button type="button">Editar</button>
+                <button type="button">Excluir</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+  </main>
+</body>
+</html>
