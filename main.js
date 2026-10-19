@@ -2,16 +2,14 @@ window.addEventListener('load', () => {
   onLoad();
 });
 
-const contacts = [
-  {
-    id: 1,
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    phone: '1234567890',
-  },
-];
+let contacts = [];
 
 const onLoad = () => {
+  const storedContacts = localStorage.getItem('contacts');
+  if (storedContacts) {
+    contacts = JSON.parse(storedContacts);
+  }
+
   const addButton = document.querySelector('#addButton');
   addButton.addEventListener('click', handleAddContact);
 
@@ -53,6 +51,8 @@ const handleSubmit = (event) => {
     email,
     phone,
   });
+
+  localStorage.setItem('contacts', JSON.stringify(contacts));
 
   updateContacts();
 
