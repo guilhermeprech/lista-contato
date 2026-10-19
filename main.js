@@ -21,7 +21,7 @@ const onLoad = () => {
 
   hideFormSection();
 
-  updateContacts();
+  updateTable();
 };
 
 const handleAddContact = (event) => {
@@ -54,26 +54,47 @@ const handleSubmit = (event) => {
 
   localStorage.setItem('contacts', JSON.stringify(contacts));
 
-  updateContacts();
+  updateTable();
 
   hideFormSection();
   resetForm();
 };
 
-const updateContacts = () => {
+const handleRemoveContact = (id) => {
+  contacts = contacts.filter(contact => contact.id !== id);
+  localStorage.setItem('contacts', JSON.stringify(contacts));
+  updateTable();
+};
+
+const updateTable = () => {
   const contactsList = document.querySelector('table tbody');
   contactsList.innerHTML = '';
   contacts.forEach(contact => {
     const contactRow = document.createElement('tr');
+
     contactRow.innerHTML = `
       <td>${contact.name}</td>
       <td>${contact.email}</td>
       <td>${contact.phone}</td>
-      <td>
-        <button type="button" id="editButton">Editar</button>
-        <button type="button" id="deleteButton">Excluir</button>
-      </td>
     `;
+
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = 'Excluir';
+    removeButton.addEventListener('click', () => handleRemoveContact(contact.id));
+
+    const editButton = document.createElement('button');
+    editButton.type = 'button';
+    editButton.textContent = 'Editar';
+    editButton.addEventListener('click', () => handleEditContact(contact.id));
+
+    const actionsCell = document.createElement('td');
+    actionsCell.className = 'buttons';
+    actionsCell.appendChild(removeButton);
+    actionsCell.appendChild(editButton);
+
+    contactRow.appendChild(actionsCell);
+
     contactsList.appendChild(contactRow);
   });
 };
