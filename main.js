@@ -78,20 +78,21 @@ const updateTable = () => {
       <td>${contact.phone}</td>
     `;
 
-    const removeButton = document.createElement('button');
-    removeButton.type = 'button';
-    removeButton.textContent = 'Excluir';
-    removeButton.addEventListener('click', () => handleRemoveContact(contact.id));
-
     const editButton = document.createElement('button');
     editButton.type = 'button';
     editButton.textContent = 'Editar';
     editButton.addEventListener('click', () => handleEditContact(contact.id));
 
+    const removeButton = document.createElement('button');
+    removeButton.type = 'button';
+    removeButton.textContent = 'Excluir';
+    removeButton.classList.add('destructive');
+    removeButton.addEventListener('click', () => handleRemoveContact(contact.id));
+
     const actionsCell = document.createElement('td');
     actionsCell.className = 'buttons';
-    actionsCell.appendChild(removeButton);
     actionsCell.appendChild(editButton);
+    actionsCell.appendChild(removeButton);
 
     contactRow.appendChild(actionsCell);
 
