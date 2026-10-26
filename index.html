@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -11,23 +12,45 @@
   <main>
     <header>
       <h1>Gestão de Contatos</h1>
-      <button type="button" id="addButton" class="primary">Adicionar Contato</button>
+      <button type="button" id="addButton" class="primary">
+        Adicionar Contato
+      </button>
     </header>
+
     <section id="formSection">
       <h2>Adicionar Contato</h2>
+
       <form>
-        <input type="text" placeholder="Nome" name="name" required />
-        <input type="email" placeholder="Email" name="email" required />
-        <input type="tel" placeholder="Telefone" name="phone" required />
+        <input type="text" name="name" placeholder="Nome" required>
+        <input type="email" name="email" placeholder="Email" required>
+        <input type="tel" name="phone" placeholder="Telefone" required>
+
         <div class="buttons">
+          <button type="button" id="favoriteButton" class="favorite">Favoritar</button>
           <button type="button" id="cancelButton">Cancelar</button>
           <button type="submit" class="primary">Adicionar</button>
         </div>
       </form>
     </section>
+
     <section>
       <h2>Lista de Contatos</h2>
-      <table>
+
+      <div class="filters">
+        <input
+          type="text"
+          id="searchInput"
+          placeholder="Buscar contato..."
+          aria-label="Buscar contato"
+        >
+
+        <select id="filterSelect" aria-label="Filtrar contatos">
+          <option value="all">Todos os contatos</option>
+          <option value="favorites">Somente favoritos</option>
+        </select>
+      </div>
+
+      <table id="contactsTable">
         <thead>
           <tr>
             <th>Nome</th>
@@ -36,9 +59,12 @@
             <th>Ações</th>
           </tr>
         </thead>
-        <tbody>
-        </tbody>
+        <tbody></tbody>
       </table>
+
+      <p id="emptyMessage" style="display: none;" role="status">
+        Nenhum contato encontrado.
+      </p>
     </section>
   </main>
 </body>

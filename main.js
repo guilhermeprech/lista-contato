@@ -1,107 +1,250 @@
-window.addEventListener('load', () => {
-  onLoad();
-});
 
 let contacts = [];
+let editingContactId = null;
+let isFavorite = false;
 
-const onLoad = () => {
+window.addEventListener('load', () => {
   const storedContacts = localStorage.getItem('contacts');
-  if (storedContacts) {
-    contacts = JSON.parse(storedContacts);
-  }
+  contacts = storedContacts ? JSON.parse(storedContacts) : [];
 
-  const addButton = document.querySelector('#addButton');
-  addButton.addEventListener('click', handleAddContact);
+  document.querySelector('#addButton')
+    .addEventListener('click', handleAddContact);
 
-  const cancelButton = document.querySelector('#cancelButton');
-  cancelButton.addEventListener('click', handleCancel);
+  document.querySelector('#cancelButton')
+    .addEventListener('click', handleCancel);
 
-  const form = document.querySelector('form');
-  form.addEventListener('submit', handleSubmit);
+  document.querySelector('#favoriteButton')
+    .addEventListener('click', handleFormFavorite);
+
+  document.querySelector('form')
+    .addEventListener('submit', handleSubmit);
+
+  document.querySelector('#searchInput')
+    .addEventListener('input', updateTable);
+
+  document.querySelector('#filterSelect')
+    .addEventListener('change', updateTable);
 
   hideFormSection();
-
   updateTable();
+});
+
+const saveContacts = () => {
+  localStorage.setItem('contacts', JSON.stringify(contacts));
 };
 
-const handleAddContact = (event) => {
-  event.preventDefault();
+const updateFavoriteButton = () => {
+  const button = document.querySelector('#favoriteButton');
 
+  button.textContent = isFavorite ? 'Favoritado' : 'Favoritar';
+  button.classList.toggle('active', isFavorite);
+  button.setAttribute('aria-pressed', String(isFavorite));
+};
+
+const handleFormFavorite = () => {
+  isFavorite = !isFavorite;
+  updateFavoriteButton();
+};
+
+const handleAddContact = () => {
+  resetForm();
   showFormSection();
 };
 
-const handleCancel = (event) => {
-  event.preventDefault();
-
-  hideFormSection();
+const handleCancel = () => {
   resetForm();
+  hideFormSection();
 };
 
 const handleSubmit = (event) => {
   event.preventDefault();
 
   const form = document.querySelector('form');
-  const name = form.querySelector('input[name="name"]').value;
-  const email = form.querySelector('input[name="email"]').value;
-  const phone = form.querySelector('input[name="phone"]').value;
+  const name = form.elements['name'].value.trim();
+  const email = form.elements['email'].value.trim();
+  const phone = form.elements['phone'].value.trim();
 
-  contacts.push({
-    id: contacts.length + 1,
-    name,
-    email,
-    phone,
-  });
+  if (!name || !email || !phone) return;
 
-  localStorage.setItem('contacts', JSON.stringify(contacts));
+  if (editingContactId !== null) {
+    const contact = contacts.find(
+      contact => contact.id === editingContactId
+    );
 
+    if (!contact) return;
+
+    contact.name = name;
+    contact.email = email;
+    contact.phone = phone;
+    contact.favorite = isFavorite;
+  } else {
+    contacts.push({
+      id: Date.now(),
+      name,
+      email,
+      phone,
+      favorite: isFavorite
+    });
+  }
+
+  saveContacts();
   updateTable();
-
-  hideFormSection();
   resetForm();
+  hideFormSection();
+};
+
+const handleEditContact = (id) => {
+  const contact = contacts.find(contact => contact.id === id);
+
+  if (!contact) return;
+
+  editingContactId = id;
+  isFavorite = contact.favorite === true;
+
+  const form = document.querySelector('form');
+
+  form.elements['name'].value = contact.name;
+  form.elements['email'].value = contact.email;
+  form.elements['phone'].value = contact.phone;
+
+  document.querySelector('#formSection h2').textContent = 'Editar Contato';
+  form.querySelector('button[type="submit"]').textContent = 'Salvar';
+
+  updateFavoriteButton();
+  showFormSection();
 };
 
 const handleRemoveContact = (id) => {
   contacts = contacts.filter(contact => contact.id !== id);
-  localStorage.setItem('contacts', JSON.stringify(contacts));
+
+  if (editingContactId === id) {
+    resetForm();
+    hideFormSection();
+  }
+
+  saveContacts();
+  updateTable();
+};
+
+const handleToggleFavorite = (id) => {
+  const contact = contacts.find(contact => contact.id === id);
+
+  if (!contact) return;
+
+  contact.favorite = !contact.favorite;
+
+  if (editingContactId === id) {
+    isFavorite = contact.favorite;
+    updateFavoriteButton();
+  }
+
+  saveContacts();
   updateTable();
 };
 
 const updateTable = () => {
-  const contactsList = document.querySelector('table tbody');
+  const contactsList = document.querySelector('#contactsTable tbody');
   contactsList.innerHTML = '';
-  contacts.forEach(contact => {
+
+  const search = document.querySelector('#searchInput')
+    .value.toLowerCase().trim();
+
+  const filter = document.querySelector('#filterSelect').value;
+
+  const filteredContacts = contacts.filter(contact => {
+    const matchesSearch =
+      contact.name.toLowerCase().includes(search) ||
+      contact.email.toLowerCase().includes(search) ||
+      contact.phone.includes(search);
+
+    const matchesFilter =
+      filter === 'all' || contact.favorite === true;
+
+    return matchesSearch && matchesFilter;
+  });
+
+  const emptyMessage = document.querySelector('#emptyMessage');
+  const table = document.querySelector('#contactsTable');
+
+  if (filteredContacts.length === 0) {
+    table.style.display = 'none';
+    emptyMessage.style.display = 'block';
+
+    emptyMessage.textContent = contacts.length === 0
+      ? 'Nenhum contato cadastrado.'
+      : 'Nenhum contato encontrado.';
+  } else {
+    table.style.removeProperty('display');
+    emptyMessage.style.display = 'none';
+  }
+
+  filteredContacts.forEach(contact => {
     const contactRow = document.createElement('tr');
 
-    contactRow.innerHTML = `
-      <td>${contact.name}</td>
-      <td>${contact.email}</td>
-      <td>${contact.phone}</td>
-    `;
+    const nameCell = document.createElement('td');
+    nameCell.textContent = contact.name;
+
+    const emailCell = document.createElement('td');
+    emailCell.textContent = contact.email;
+
+    const phoneCell = document.createElement('td');
+    phoneCell.textContent = contact.phone;
+
+    const actionsCell = document.createElement('td');
+    actionsCell.className = 'buttons';
+
+    const favoriteButton = document.createElement('button');
+    favoriteButton.type = 'button';
+    favoriteButton.textContent = contact.favorite ? '★' : '☆';
+    favoriteButton.classList.add('favorite-button');
+    favoriteButton.classList.toggle('active', contact.favorite === true);
+    favoriteButton.setAttribute(
+      'aria-label',
+      contact.favorite ? 'Remover dos favoritos' : 'Adicionar aos favoritos'
+    );
+    favoriteButton.setAttribute(
+      'aria-pressed',
+      String(contact.favorite === true)
+    );
+
+    favoriteButton.addEventListener('click', () => {
+      handleToggleFavorite(contact.id);
+    });
 
     const editButton = document.createElement('button');
     editButton.type = 'button';
     editButton.textContent = 'Editar';
-    editButton.addEventListener('click', () => handleEditContact(contact.id));
+
+    editButton.addEventListener('click', () => {
+      handleEditContact(contact.id);
+    });
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
     removeButton.textContent = 'Excluir';
     removeButton.classList.add('destructive');
-    removeButton.addEventListener('click', () => handleRemoveContact(contact.id));
 
-    const actionsCell = document.createElement('td');
-    actionsCell.className = 'buttons';
-    actionsCell.appendChild(editButton);
-    actionsCell.appendChild(removeButton);
+    removeButton.addEventListener('click', () => {
+      handleRemoveContact(contact.id);
+    });
 
-    contactRow.appendChild(actionsCell);
-
+    actionsCell.append(favoriteButton, editButton, removeButton);
+    contactRow.append(nameCell, emailCell, phoneCell, actionsCell);
     contactsList.appendChild(contactRow);
   });
 };
 
 const resetForm = () => {
-  document.querySelector('form').reset();
+  const form = document.querySelector('form');
+  form.reset();
+
+  editingContactId = null;
+  isFavorite = false;
+
+  document.querySelector('#formSection h2').textContent = 'Adicionar Contato';
+  form.querySelector('button[type="submit"]').textContent = 'Adicionar';
+
+  updateFavoriteButton();
 };
 
 const hideFormSection = () => {
@@ -109,5 +252,5 @@ const hideFormSection = () => {
 };
 
 const showFormSection = () => {
-  document.querySelector('#formSection').style.removeProperty('display');
+  document.querySelector('#formSection').style.display = 'flex';
 };

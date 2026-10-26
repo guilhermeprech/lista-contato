@@ -63,3 +63,10 @@ Não utilizar banco de dados ou servidor.
 Persistir os dados utilizando Local Storage.
 O projeto deve demonstrar a capacidade de manter dados em um array de objetos, refletir esses dados na interface, reagir a eventos do usuário e persistir o estado da aplicação no navegador utilizando JSON e Local Storage.
 
+
+
+FAZER: 
+1- Busca e filtro 
+2- Ediçao do contato 
+3- Estado vazio
+4- Favoritos
